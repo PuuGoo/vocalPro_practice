@@ -1,0 +1,155 @@
+// ============================
+// VocalPro - Prisma Schema for Azure SQL Database
+// ============================
+
+// Config prisma
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "sqlserver"
+    url = env("DATABASE_URL")
+}
+
+/// Cascade paths overview:
+/// 
+/// User
+/// ├──< Vocabulary (onDelete: Cascade)        // Xóa User → Xóa Vocabulary
+/// │      ├──< Review (onDelete: Cascade)     // Xóa Vocabulary → Xóa Review
+/// │      └──< VocabularyTag (onDelete: Cascade) // Xóa Vocabulary → Xóa liên kết với Tag
+/// │
+/// ├──< Review (onDelete: NoAction)          // Xóa User → không xóa Review trực tiếp
+/// ├──< Session (onDelete: Cascade)          // Xóa User → Xóa Session
+/// └──< Tag (onDelete: Cascade)              // Xóa User → Xóa Tag
+///        └──< VocabularyTag (onDelete: NoAction) // Xóa Tag → không xóa liên kết với Vocabulary
+
+
+// User Model
+model User {
+    id String @id @default(uuid())
+    email String @unique
+    name String?
+    passwordHash String?
+    role String @default("USER")
+    settings String? @db.NVarChar(Max)
+    googleId String?
+    emailVerified Boolean @default(false)
+
+    vocabularies Vocabulary[]
+    tags Tag[]
+    reviews Review[]
+    sessions Session[]
+
+    @@index([googleId])
+    @@map("users")
+}
+
+// Session Model
+
+model Session {
+    id String @id @default(uuid())
+    sid String @unique
+    userId String
+    expiresAt DateTime
+    data String @db.NVarChar(Max)
+
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade) // Nếu người dùng bị xóa thì tất cả session liên quan cũng bị xóa
+
+    @@index([sid])
+    @@map("sessions")
+}
+
+// Vocabulary Model
+
+model Vocabulary {
+    id String @id @default(uuid())
+    userId String
+    word String
+    pronunciation String?
+    definition String? @db.NVarChar(Max)
+    example String? @db.NVarChar(Max)
+    partOfSpeech String?
+    difficulty Int @default(1)
+    imageUrl String?
+    audioUrl String?
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+    reviews Review[]
+    vocabularyTag VocabularyTag[]
+
+    @@index([userId])
+    @@index([word])
+    @@map("vocabularies")
+}
+
+// Tag Model
+
+model Tag {
+    id String @id @default(uuid())
+    userId String
+    name String
+    color String?
+    createdAt DateTime @default(now())
+
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+    vocabularyTag VocabularyTag[]
+
+    @@unique([userId, name])
+    @@index([userId])
+    @@map("tags")
+}
+
+// Review Model
+
+model Review {
+    id String @id @default(uuid())
+    userId String
+    vocabularyId String
+    easeFactor Float @default(2.5) //Giá trị SM-2 (Spaced Repetition) để tính khoảng cách giữa các lần học.
+    interval Int @default(0) // Khoảng cách hiện tại (ngày) trước lần review tiếp theo.
+    repetitions Int @default(0) // Số lần đã học / lặp lại từ này
+    nextReview DateTime
+    lastReviewed DateTime?
+    quality Int? //Điểm đánh giá chất lượng recall (thường 0–5), nullable.
+    createdAt DateTime @default(now())
+
+    user User @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+    vocabulary Vocabulary @relation(fields: [vocabularyId], references: [id], onDelete: Cascade)
+
+    @@unique([userId, vocabularyId])
+    @@index([userId])
+    @@index([nextReview])
+    @@map("reviews")
+}
+
+// API Usage Tracking Model
+
+model ApiUsage {
+    id String @id @default(uuid())
+    endpoint String
+    date DateTime
+    count Int @default(0)
+    createdAt DateTime @default(now())
+
+    @@unique([endpoint, date])
+    @@index([endpoint])
+    @@index([date])
+    @@map("api_usage")
+}
+
+// VocabularyTag Model
+
+model VocabularyTag {
+  vocabularyId String
+  tagId        String
+
+  vocabulary Vocabulary @relation(fields: [vocabularyId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  tag        Tag        @relation(fields: [tagId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([vocabularyId, tagId])
+  @@map("vocabulary_tags")
+}
+
