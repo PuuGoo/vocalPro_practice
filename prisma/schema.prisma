@@ -153,3 +153,4 @@ model VocabularyTag {
   @@map("vocabulary_tags")
 }
 
+
