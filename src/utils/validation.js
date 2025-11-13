@@ -45,3 +45,107 @@ export const validate = (validations) => {
     });
   };
 };
+
+// ==========================================
+//  AUTHENTICATION VALIDATION SCHEMA -- Sơ đồ xác thực
+// ==========================================
+
+/**
+ * Register validation schema -- Sơ đồ xác thực đăng ký
+ * Validates: email format, password strength, name length -- Xác thực: định dạng email, độ mạnh mật khẩu, độ dài tên
+ *
+ * Password requirements:
+ * - Min 8 characters -- Tối thiểu 8 ký tự
+ * - At least one lowercase letter -- Ít nhất một chữ cái viết thường
+ * - At least one uppercase letter -- Ít nhất một chữ cái viết hoa
+ * - At least one number -- Ít nhất một chữ số
+ * - At least one special character -- Ít nhất một ký tự đặc biệt
+ *
+ * @example
+ * Valid: { email: "user@example.com", password: "StrongP@ssw0rd", name: "John Doe" }
+ * Invalid: { email: "user", password: "weak", name: "J" }
+ */
+
+export const registerSchema = [
+  body("email")
+    .trim() // Remove leading/trailing whitespace -- Xóa khoảng trắng đầu/cuối
+    .notEmpty()
+    .withMessage("Email là bắt buộc") // Email is required -- Email là bắt buộc
+    .isEmail()
+    .withMessage("Email không hợp lệ") // Invalid email format -- Định dạng email không hợp lệ
+    .normalizeEmail() // Normalize email -- Chuẩn hóa email -- chuyển thành chữ thường, loại bỏ dấu chấm thừa
+    .isLength({ max: 255 })
+    .withMessage("Email không được vượt quá 255 ký tự") // Email max length -- Độ dài tối đa của email
+    .custom((email) => {
+      // Additional check: email must not contain spaces after normalization -- Kiểm tra bổ sung: email không được chứa khoảng trắng sau khi chuẩn hóa
+
+      if (email.includes(" ")) {
+        throw new Error("Email không được chứa khoảng trắng");
+      }
+      return true;
+    }),
+
+  body("password")
+    .notEmpty()
+    .withMessage("Mật khẩu là bắt buộc") // Password is required -- Mật khẩu là bắt buộc
+    .isLength({ min: 8, max: 128 })
+    .withMessage("Mật khẩu phải từ 8 đến 128 ký tự") // Password length -- Độ dài mật khẩu
+    .matches(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
+    )
+    .withMessage(
+      "Mật khẩu phải chứa ít nhất một chữ cái viết thường, một chữ cái viết hoa, một số và một ký tự đặc biệt"
+    ) // Password complexity -- Độ phức tạp mật khẩu --
+    // ?=.* là lookahead assertion để kiểm tra sự tồn tại của các ký tự mà không tiêu thụ chúng,
+    // không tiêu thụ nghĩa là không di chuyển con trỏ trong chuỗi ví dụ: (?=.*[a-z])
+    // kiểm tra ít nhất một chữ cái viết thường mà không di chuyển con trỏ-
+    // di chuyển con trỏ là hành động đọc ký tự trong chuỗi
+    // [A-Za-z\d@$!%*?&]{8,} tiêu thụ ký tự, nghĩa là con trỏ di chuyển qua từng ký tự để xác nhận toàn bộ chuỗi đáp ứng yêu cầu
+    // Ví dụ chạy trên "StrongP@ssw0rd":
+    // - (?=.*[a-z]) tìm thấy 't' (con trỏ không di chuyển)
+    // - (?=.*[A-Z]) tìm thấy 'S' (con trỏ không di chuyển)
+    // - (?=.*\d) tìm thấy '0' (con trỏ không di chuyển)
+    // - (?=.*[@$!%*?&]) tìm thấy '@' (con trỏ không di chuyển)
+    // - [A-Za-z\d@$!%*?&]{8,} bây giờ con trỏ di chuyển qua từng ký tự để xác nhận toàn bộ chuỗi đáp ứng yêu cầu
+    // Kết quả: Mật khẩu hợp lệ
+    .custom((password) => {
+      // Check for common weak passwords -- Kiểm tra mật khẩu yếu phổ biến
+      const weakPasswords = [
+        "Password123",
+        "12345678",
+        "Qwerty123",
+        "Admin123",
+      ];
+      if (weakPasswords.includes(password)) {
+        throw new Error("Mật khẩu quá yếu, vui lòng chọn mật khẩu khác");
+      }
+      return true;
+    }),
+
+  body("name")
+    .optional({ nullable: true, checkFalsy: true }) // Name is optional -- Tên là tùy chọn -- Allow null, undefined, empty string
+    .trim()
+    .isLength({ min: 2, max: 50 })
+    .withMessage("Tên phải từ 2 đến 50 ký tự") // Name length -- Độ dài tên
+    .matches(/^[\p{L}\s'-]+$/u)
+    .withMessage(
+      "Tên chỉ được chứa chữ cái, khoảng trắng, dấu gạch ngang và dấu nháy đơn"
+    )
+    // Name character set -- Bộ ký tự tên -- +$ nghĩa là toàn bộ chuỗi phải tuân theo mẫu này
+    // /^[\p{L}\s'-]+$/u chi tiết:
+    // ^ bắt đầu chuỗi
+    // [\p{L}\s'-]+ một hoặc nhiều ký tự thuộc các loại sau:
+    // \p{L}: bất kỳ ký tự chữ nào từ bất kỳ ngôn ngữ nào (Unicode property escape) -- nghĩa là tất cả chữ cái từ mọi ngôn ngữ
+    // \s: ký tự khoảng trắng (space, tab, newline)
+    // ': dấu nháy đơn
+    // -: dấu gạch ngang
+    // $ kết thúc chuỗi
+    // /u: cờ Unicode để hỗ trợ các ký tự Unicode
+    .custom((name) => {
+      // Check for multiple consecutive spaces
+      if (/\s{2,}/.test(name)) {
+        throw new Error("Tên không được chứa khoảng trắng liên tiếp");
+      }
+      return true;
+    }),
+];

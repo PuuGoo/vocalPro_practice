@@ -1,17 +1,21 @@
 import { body } from "express-validator";
-import { validate } from "../vocalpro-backend/src/utils/validation.js";
+import {
+  validate,
+  registerSchema,
+} from "../vocalpro-backend/src/utils/validation.js";
 
-const validations = [
-  body("email").isEmail().withMessage("Email không hợp lệ"),
-  body("password")
-    .isLength({ min: 6 })
-    .withMessage("Mật khẩu phải có ít nhất 6 ký tự"),
-];
+// const validations = [
+//   body("email").isEmail().withMessage("Email không hợp lệ"),
+//   body("password")
+//     .isLength({ min: 6 })
+//     .withMessage("Mật khẩu phải có ít nhất 6 ký tự"),
+// ];
 
 const mockReq = {
   body: {
     email: "phund@gmail.com",
-    password: "123456",
+    password: "Abc@12356789",
+    name: "puugoo",
   },
 };
 
@@ -31,6 +35,6 @@ const mockNext = () => {
 };
 
 (async () => {
-  const middleware = validate(validations);
+  const middleware = validate(registerSchema);
   await middleware(mockReq, mockRes, mockNext);
 })();
