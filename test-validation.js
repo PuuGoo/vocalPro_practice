@@ -1,7 +1,8 @@
 import { body } from "express-validator";
 import {
   validate,
-  registerSchema,
+    registerSchema,
+  loginSchema,
 } from "../vocalpro-backend/src/utils/validation.js";
 
 // const validations = [
@@ -13,9 +14,8 @@ import {
 
 const mockReq = {
   body: {
-    email: "phund@gmail.com",
+    email: "user",
     password: "Abc@12356789",
-    name: "puugoo",
   },
 };
 
@@ -35,6 +35,6 @@ const mockNext = () => {
 };
 
 (async () => {
-  const middleware = validate(registerSchema);
+  const middleware = validate(loginSchema);
   await middleware(mockReq, mockRes, mockNext);
 })();

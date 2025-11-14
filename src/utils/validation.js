@@ -149,3 +149,25 @@ export const registerSchema = [
       return true;
     }),
 ];
+
+/**
+ * Login validation schema -- Sơ đồ xác thực đăng nhập
+ * Validates: email format, password presence -- Xác thực: định dạng email, sự tồn tại của mật khẩu
+ * 
+ * Note: No password strength check here -- Lưu ý: Không kiểm tra độ mạnh mật khẩu ở đây
+ * 
+ * @example
+ * Valid: { email: "user@example.com", password: "AnyPassword" }
+ * Invalid: { email: "user", password: "" }
+ */
+
+export const loginSchema = [
+    body('email')
+        .trim()
+        .notEmpty().withMessage('Email là bắt buộc') // Email is required -- Email là bắt buộc
+        .isEmail().withMessage('Email không hợp lệ') // Invalid email format -- Định dạng email không hợp lệ
+        .normalizeEmail(), // Normalize email -- Chuẩn hóa email
+    body('password')
+        .notEmpty().withMessage('Mật khẩu là bắt buộc') // Password is required -- Mật khẩu là bắt buộc.
+        .isString().withMessage('Mật khẩu phải là chuỗi ký tự'), // Password must be a string -- Mật khẩu phải là chuỗi ký tự
+]

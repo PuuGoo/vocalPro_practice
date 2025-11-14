@@ -47,3 +47,5 @@ uploads/*
 # Docker
 docker-compose.override.yml
 .vercel
+
+.vs/
