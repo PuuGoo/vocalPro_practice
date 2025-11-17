@@ -2,8 +2,11 @@ import { body } from "express-validator";
 import {
   validate,
     registerSchema,
-  loginSchema,
+    loginSchema,
+    passwordResetRequestSchema,
+    passwordResetConfirmationSchema
 } from "../vocalpro-backend/src/utils/validation.js";
+
 
 // const validations = [
 //   body("email").isEmail().withMessage("Email không hợp lệ"),
@@ -14,9 +17,9 @@ import {
 
 const mockReq = {
   body: {
-    email: "user",
-    password: "Abc@12356789",
-  },
+        token: "11111111111111111111111111111111",
+		newPassword: "Newpassword@123"
+  }
 };
 
 const mockRes = {
@@ -35,6 +38,6 @@ const mockNext = () => {
 };
 
 (async () => {
-  const middleware = validate(loginSchema);
+    const middleware = validate(passwordResetConfirmationSchema);
   await middleware(mockReq, mockRes, mockNext);
 })();

@@ -170,4 +170,53 @@ export const loginSchema = [
     body('password')
         .notEmpty().withMessage('Mật khẩu là bắt buộc') // Password is required -- Mật khẩu là bắt buộc.
         .isString().withMessage('Mật khẩu phải là chuỗi ký tự'), // Password must be a string -- Mật khẩu phải là chuỗi ký tự
-]
+];
+
+/**
+ * Password reset request validation schema -- Sơ đồ xác thực yêu cầu đặt lại mật khẩu
+ * Validates: email format -- Xác thực: định dạng email
+ * 
+ * @example
+ * Valid: { email: "example@gmail.com" }"
+ * Invalid: { email: "invalid-email" }  
+ */
+
+export const passwordResetRequestSchema = [
+    body('email')
+        .trim() // Remove leading/trailing whitespace -- Xóa khoảng trắng đầu/cuối
+        .notEmpty().withMessage('Email là bắt buộc') // Email is required -- Email là bắt buộc
+        .isEmail().withMessage('Email không hợp lệ') // Invalid email format -- Định dạng email không hợp lệ
+		.normalizeEmail(), // Normalize email -- Chuẩn hóa email
+];
+
+ /**
+  * Password reset confirmation validation schema -- Sơ đồ xác thực xác nhận đặt lại mật khẩu
+  * Validates: token presence, new password strength -- Xác thực: sự tồn tại của token, độ mạnh mật khẩu mới
+  * 
+  * @example
+  * Valid: { token: "valid-token", newPassword: "NewStrongP@ss1" }
+  * Invalid: { token: "", newPassword: "weak" }
+  */
+
+export const passwordResetConfirmationSchema = [
+    body('token')
+        .notEmpty().withMessage('Token là bắt buộc') // Token is required -- Token là bắt buộc
+        .isLength({ min: 32, max: 64 }).withMessage('Token không hợp lệ'), // Token length check -- Kiểm tra độ dài token
+    body('newPassword')
+        .notEmpty().withMessage('Mật khẩu mới là bắt buộc') // New password is required -- Mật khẩu mới là bắt buộc
+        .isLength({ min: 8, max: 128 }).withMessage('Mật khẩu mới phải từ 8 đến 128 ký tự') // New password length -- Độ dài mật khẩu mới
+        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/).withMessage('Mật khẩu mới phải chứa ít nhất một chữ cái viết thường, một chữ cái viết hoa, một số và một ký tự đặc biệt') // New password complexity -- Độ phức tạp mật khẩu mới)
+        .custom((password) => {
+            // Check for common weak passwords -- Kiểm tra mật khẩu yếu phổ biến
+            const weakPasswords = [
+                "Password123",
+                "12345678",
+                "Qwerty123",
+                "Admin123",
+            ];
+            if (weakPasswords.includes(password)) {
+                throw new Error("Mật khẩu quá yếu, vui lòng chọn mật khẩu khác");
+            }
+            return true;
+        }),
+];
