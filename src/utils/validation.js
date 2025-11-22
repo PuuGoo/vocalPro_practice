@@ -220,3 +220,36 @@ export const passwordResetConfirmationSchema = [
             return true;
         }),
 ];
+
+/**
+ * Change password validation schema -- Sơ đồ xác thực thay đổi mật khẩu
+ * Validates: current password presence, new password strength -- Xác thực: sự tồn tại của mật khẩu hiện tại, độ mạnh mật khẩu mới
+ * 
+ * @example
+ * Valid: { currentPassword: "CurrentP@ss1", newPassword: "NewStrongP@ss1" }
+ * Invalid: { currentPassword: "", newPassword: "weak" }
+ */
+
+export const changePasswordSchema = [
+    body('currentPassword')
+        .notEmpty().withMessage('Mật khẩu hiện tại là bắt buộc'), // Current password is required -- Mật khẩu hiện tại là bắt buộc
+    body('newPassword')
+        .notEmpty().withMessage('Mật khẩu mới là bắt buộc') // New password is required -- Mật khẩu mới là bắt buộc
+        .isLength({ min: 8, max: 128 }).withMessage('Mật khẩu mới phải từ 8 đến 128 ký tự') // New password length -- Độ dài mật khẩu mới
+        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/).withMessage('Mật khẩu mới phải chứa ít nhất một chữ cái viết thường, một chữ cái viết hoa, một số và một ký tự đặc biệt') // New password complexity -- Độ phức tạp mật khẩu mới)
+        .custom((newPassword, { req }) => {
+            if (newPassword === req.body.currentPassword) {
+                throw new Error('Mật khẩu mới phải khác mật khẩu hiện tại');
+            }
+            return true;
+        }),
+    body('confirmNewPassword')
+        .notEmpty().withMessage('Xác nhận mật khẩu mới là bắt buộc') // Confirm new password is required -- Xác nhận mật khẩu mới là bắt buộc
+        .custom((confirmNewPassword, { req }) => {
+            if (confirmNewPassword !== req.body.newPassword) {
+                throw new Error('Xác nhận mật khẩu mới không khớp');
+            }
+            return true;
+        })
+];
+

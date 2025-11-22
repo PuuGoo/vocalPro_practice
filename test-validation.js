@@ -4,7 +4,8 @@ import {
     registerSchema,
     loginSchema,
     passwordResetRequestSchema,
-    passwordResetConfirmationSchema
+    passwordResetConfirmationSchema,
+	changePasswordSchema
 } from "../vocalpro-backend/src/utils/validation.js";
 
 
@@ -16,9 +17,10 @@ import {
 // ];
 
 const mockReq = {
-  body: {
-        token: "11111111111111111111111111111111",
-		newPassword: "Newpassword@123"
+    body: {
+        currentPassword: "oldpassword123",
+        newPassword: "NewPassword@123",
+        confirmNewPassword: "NewPassword@123"
   }
 };
 
@@ -38,6 +40,6 @@ const mockNext = () => {
 };
 
 (async () => {
-    const middleware = validate(passwordResetConfirmationSchema);
+    const middleware = validate(changePasswordSchema);
   await middleware(mockReq, mockRes, mockNext);
 })();

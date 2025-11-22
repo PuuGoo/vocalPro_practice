@@ -282,3 +282,6 @@ export const logWithContext = (level, message, context = {}) => {
     timestamp: new Date().toISOString(),
   });
 };
+
+
+logger.debug("Dang ky thanh cong:", {gmail: "test@gmail.com", name: "Thai Phuong"});
