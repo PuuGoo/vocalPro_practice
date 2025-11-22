@@ -1,9 +1,143 @@
-<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36" version="27.0.3">
-  <diagram name="Trang-1" id="wn_-urQOyAFSmO3dyDTq">
-    <mxGraphModel>
+<mxfile host="app.diagrams.net">
+  <diagram id="vocalpro-erd" name="VocalPro ERD">
+    <mxGraphModel dx="1194" dy="738" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
-        <mxCell id="0" />
-        <mxCell id="1" parent="0" />
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- USER -->
+        <mxCell id="user" value="User
+--------------------
+id (PK)
+email (U)
+name
+passwordHash
+role
+settings
+googleId
+emailVerified" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc" vertex="1">
+          <mxGeometry x="70" y="60" width="200" height="200" as="geometry"/>
+        </mxCell>
+
+        <!-- SESSION -->
+        <mxCell id="session" value="Session
+--------------------
+id (PK)
+sid (U)
+userId (FK)
+expiresAt
+data" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc" vertex="1">
+          <mxGeometry x="350" y="30" width="200" height="160" as="geometry"/>
+        </mxCell>
+
+        <!-- VOCABULARY -->
+        <mxCell id="vocabulary" value="Vocabulary
+--------------------
+id (PK)
+userId (FK)
+word
+pronunciation
+definition
+example
+partOfSpeech
+difficulty
+imageUrl
+audioUrl
+createdAt
+updatedAt" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4" vertex="1">
+          <mxGeometry x="350" y="260" width="240" height="260" as="geometry"/>
+        </mxCell>
+
+        <!-- TAG -->
+        <mxCell id="tag" value="Tag
+--------------------
+id (PK)
+userId (FK)
+name
+color
+createdAt" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc" vertex="1">
+          <mxGeometry x="60" y="330" width="200" height="180" as="geometry"/>
+        </mxCell>
+
+        <!-- REVIEW -->
+        <mxCell id="review" value="Review
+--------------------
+id (PK)
+userId (FK)
+vocabularyId (FK)
+easeFactor
+interval
+repetitions
+nextReview
+lastReviewed
+quality
+createdAt" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7" vertex="1">
+          <mxGeometry x="650" y="270" width="230" height="260" as="geometry"/>
+        </mxCell>
+
+        <!-- API USAGE -->
+        <mxCell id="api_usage" value="ApiUsage
+--------------------
+id (PK)
+endpoint
+date
+count
+createdAt" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5" vertex="1">
+          <mxGeometry x="650" y="40" width="220" height="170" as="geometry"/>
+        </mxCell>
+
+        <!-- VOCABULARY TAG -->
+        <mxCell id="vocabulary_tag" value="VocabularyTag
+--------------------
+vocabularyId (PK, FK)
+tagId (PK, FK)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffdede" vertex="1">
+          <mxGeometry x="350" y="580" width="220" height="120" as="geometry"/>
+        </mxCell>
+
+        <!-- RELATIONS -->
+
+        <!-- User - Session -->
+        <mxCell id="rel_user_session" edge="1" parent="1" source="user" target="session"
+          value="1 → * (Cascade)">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- User - Vocabulary -->
+        <mxCell id="rel_user_vocabulary" edge="1" source="user" target="vocabulary"
+          value="1 → * (Cascade)">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- User - Tag -->
+        <mxCell id="rel_user_tag" edge="1" source="user" target="tag"
+          value="1 → * (Cascade)">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- User - Review (NoAction) -->
+        <mxCell id="rel_user_review" edge="1" source="user" target="review"
+          value="1 → * (NoAction)">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Vocabulary - Review -->
+        <mxCell id="rel_vocab_review" edge="1" source="vocabulary" target="review"
+          value="1 → * (Cascade)">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Vocabulary - VocabularyTag -->
+        <mxCell id="rel_vocab_vt" edge="1" source="vocabulary" target="vocabulary_tag"
+          value="1 → * (Cascade)">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Tag - VocabularyTag -->
+        <mxCell id="rel_tag_vt" edge="1" source="tag" target="vocabulary_tag"
+          value="1 → * (NoAction)">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
       </root>
     </mxGraphModel>
   </diagram>
