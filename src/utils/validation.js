@@ -16,7 +16,7 @@ import { body, param, query, validationResult } from "express-validator";
  *  validate(registerSchema),
  *  async (req,res) => {
  *    // Core here chỉ chạy nếu validation pass -- chỉ chạy nếu xác thực thành công
- *  }
+ *  }sd
  * );
  */
 
@@ -252,4 +252,24 @@ export const changePasswordSchema = [
             return true;
         })
 ];
+
+
+
+// ==========================================
+//  VOCABULARY VALIDATION SCHEMA -- Sơ đồ xác thực từ vựng
+// ==========================================
+
+/**
+ * Vocabulary creation/update validation schema -- Sơ đồ xác thực tạo hoặc cập nhật từ vựng
+ * Validates: word, pronuciation, definition, example, etc. -- Xác thực: từ, cách phát âm, định nghĩa, ví dụ, v.v.
+ * 
+ * @example
+ * Valid: { word: "example", definition: "A representative form or pattern.", ... }sadsddssdsdssdsdsds
+ * Invalid: { word: "", definition: "" }}
+ */
+
+
+
+
+
 

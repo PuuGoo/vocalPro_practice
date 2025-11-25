@@ -150,7 +150,7 @@ model VocabularyTag {
   tag        Tag        @relation(fields: [tagId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([vocabularyId, tagId])
-  @@map("vocabulary_tags")
+  @@map("vocabulary_tags")  
 }
 
 
